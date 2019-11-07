@@ -1,0 +1,39 @@
+﻿@page "/addArticle"
+@using BlazorCRUD.Entities
+@using BlazorCRUD.Contracts
+@inject IArticleManager articleManager
+@inject Microsoft.AspNetCore.Components.NavigationManager navigationManager
+<h1>
+    Add Article
+</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <form>
+            <div class="form-group">
+                <label for="Name" class="control-label">Name</label>
+                <input for="Name" class="form-control" @bind-value="@article.Title" />
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" @onclick="() => CreateArticle()">Save</button>
+                <button type="button" class="btn btn-danger" @onclick="() => cancel()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@code {
+
+    Article article = new Article();
+
+    protected async Task CreateArticle()
+    {
+        await articleManager.Create(article);
+        navigationManager.NavigateTo("/articlelist");
+    }
+
+    void cancel()
+    {
+        navigationManager.NavigateTo("/articlelist");
+    }
+}

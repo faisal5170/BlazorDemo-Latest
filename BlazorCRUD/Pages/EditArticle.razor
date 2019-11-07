@@ -1,0 +1,45 @@
+﻿@page "/editArticle/{ID}"
+@using BlazorCRUD.Entities
+@using BlazorCRUD.Contracts
+@inject IArticleManager articleManager
+@inject Microsoft.AspNetCore.Components.NavigationManager navigationManager
+
+    <div class="row">
+        <div class="col-md-4">
+            <form>
+                <div class="form-group">
+                    <label for="Name" class="control-label">Name</label>
+                    <input for="Name" class="form-control" @bind-value="@articleEntity.Title" />
+                    <input type="hidden"  @bind-value="@articleEntity.ID" />
+                </div>
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary" @onclick="() => UpdateArticle()">Save</button>
+                    <button type="button" class="btn btn-danger" @onclick="() => cancel()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+@code  {
+
+    [Parameter]
+    public string ID { get; set; }
+
+    Article articleEntity = new Article();
+
+    protected override async Task OnInitializedAsync()
+    {
+       articleEntity = await articleManager.GetById(Convert.ToInt32(ID));
+    }
+
+    protected async Task UpdateArticle()
+    {
+        await articleManager.Update(articleEntity);
+        navigationManager.NavigateTo("/articlelist");
+    }
+
+    void cancel()
+    {
+        navigationManager.NavigateTo("/articlelist");
+    }
+}

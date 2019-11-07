@@ -1,0 +1,59 @@
+﻿@page "/articlelist"
+
+@using BlazorCRUD.Entities
+@using BlazorCRUD.Contracts
+@inject IArticleManager articleManager
+
+<div>
+    <a class="btn btn-primary" href='/addArticle'>Add</a>
+</div>
+<br />
+
+@if (articleModel == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var article in articleModel)
+            {
+                <tr>
+                    <td>@article.ID</td>
+                    <td>@article.Title</td>
+                    <td>
+                        <a class="btn btn-primary" href='/editArticle/@article.ID'>Edit</a>  |
+                        <a class="btn btn-danger" @onclick="() => DeleteArticle(article.ID)">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    List<Article> articleModel;
+    Article articleEntity = new Article();
+
+    protected override async Task OnInitializedAsync()
+    {
+        articleModel = await articleManager.ListAll();
+    }
+
+
+    protected async Task DeleteArticle(int id)
+    {
+        await articleManager.Delete(id);
+        articleModel = await articleManager.ListAll();
+    }
+
+}
