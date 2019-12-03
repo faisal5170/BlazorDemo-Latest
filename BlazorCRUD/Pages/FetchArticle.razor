@@ -4,6 +4,18 @@
 @using BlazorCRUD.Contracts
 @inject IArticleManager articleManager
 
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+<style>
+    .sort-th {
+        cursor: pointer;
+    }
+
+    .fa {
+        float: right;
+    }
+</style>
+
 <div>
     <a class="btn btn-primary" href='/addArticle'>Add</a>
 </div>
@@ -15,11 +27,17 @@
 }
 else
 {
-    <table class="table">
+    <table class="table table-bordered table-hover">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Title</th>
+                <th class="sort-th" @onclick="@(() => SortTable("ID"))">
+                    ID
+                    <span class="fa @(SetSortIcon("ID"))"></span>
+                </th>
+                <th class="sort-th" @onclick="@(() => SortTable("Title"))">
+                    Title
+                    <span class="fa @(SetSortIcon("Title"))"></span>
+                </th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -54,6 +72,49 @@ else
     {
         await articleManager.Delete(id);
         articleModel = await articleManager.ListAll();
+    }
+
+    private bool isSortedAscending;
+    private string activeSortColumn;
+
+    private void SortTable(string columnName)
+    {
+        if (columnName != activeSortColumn)
+        {
+            articleModel = articleModel.OrderBy(x => x.GetType().GetProperty(columnName).GetValue(x, null)).ToList();
+            isSortedAscending = true;
+            activeSortColumn = columnName;
+
+        }
+        else
+        {
+            if (isSortedAscending)
+            {
+                articleModel = articleModel.OrderByDescending(x => x.GetType().GetProperty(columnName).GetValue(x, null)).ToList();
+            }
+            else
+            {
+                articleModel = articleModel.OrderBy(x => x.GetType().GetProperty(columnName).GetValue(x, null)).ToList();
+            }
+
+            isSortedAscending = !isSortedAscending;
+        }
+    }
+
+    private string SetSortIcon(string columnName)
+    {
+        if (activeSortColumn != columnName)
+        {
+            return string.Empty;
+        }
+        if (isSortedAscending)
+        {
+            return "fa-sort-up";
+        }
+        else
+        {
+            return "fa-sort-down";
+        }
     }
 
 }
