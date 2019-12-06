@@ -8,8 +8,9 @@ namespace BlazorCRUD.Contracts
     {
         Task<int> Create(Article article);
         Task<int> Delete(int Id);
+        Task<int> Count();
         Task<int> Update(Article article);
         Task<Article> GetById(int Id);
-        Task<List<Article>> ListAll();
+        Task<List<Article>> ListAll(int skip, int take, string orderBy, string direction);
     }
 }

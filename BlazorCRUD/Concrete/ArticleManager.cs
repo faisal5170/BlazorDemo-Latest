@@ -39,24 +39,32 @@ namespace BlazorCRUD.Concrete
                     commandType: CommandType.Text));
             return deleteArticle;
         }
-
-        public Task<List<Article>> ListAll()
+        
+        public Task<int> Count()
         {
-            var articles = Task.FromResult(_dapperManager.GetAll<Article>("select * from [Article]", null, commandType: CommandType.Text));
+            var totArticle = Task.FromResult(_dapperManager.Get<int>("select COUNT(*) from [Article]", null,
+                    commandType: CommandType.Text));
+            return totArticle;
+        }
+
+        public Task<List<Article>> ListAll(int skip, int take, string orderBy, string direction = "DESC")
+        {
+            var articles = Task.FromResult(_dapperManager.GetAll<Article>
+                ($"select * from [Article] ORDER BY {orderBy} {direction} OFFSET {skip} ROWS FETCH NEXT {take} ROWS ONLY; ", null, commandType: CommandType.Text));
             return articles;
 
         }
 
         public Task<int> Update(Article article)
-            {
-                var dbPara = new DynamicParameters();
-                dbPara.Add("Id", article.ID);
-                dbPara.Add("Title", article.Title, DbType.String);
+        {
+            var dbPara = new DynamicParameters();
+            dbPara.Add("Id", article.ID);
+            dbPara.Add("Title", article.Title, DbType.String);
 
-                var updateArticle = Task.FromResult(_dapperManager.Update<int>("[dbo].[SP_Update_Article]",
-                                dbPara,
-                                commandType: CommandType.StoredProcedure));
-                return updateArticle;
-            }
+            var updateArticle = Task.FromResult(_dapperManager.Update<int>("[dbo].[SP_Update_Article]",
+                            dbPara,
+                            commandType: CommandType.StoredProcedure));
+            return updateArticle;
+        }
     }
 }
