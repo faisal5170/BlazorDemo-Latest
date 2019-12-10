@@ -37,6 +37,9 @@
 }
 else
 {
+    <div class="row col-md-3 pull-right">
+        <input type="text" id="txtSearch" placeholder="Search Titles..." class="form-control" @bind="SearchTerm" @bind:event="oninput" />
+    </div>
     <table class="table table-bordered table-hover">
         <thead>
             <tr>
@@ -52,17 +55,29 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var article in articleModel)
+            @if (articleModel == null || articleModel.Count == 0)
             {
                 <tr>
-                    <td>@article.ID</td>
-                    <td>@article.Title</td>
-                    <td>
-                        <a class="btn btn-primary" href='/editArticle/@article.ID'>Edit</a>  |
-                        <a class="btn btn-danger" @onclick="() => DeleteArticle(article.ID)">Delete</a>
+                    <td colspan="3">
+                        No Records to display
                     </td>
                 </tr>
             }
+            else
+            {
+                foreach (var article in articleModel)
+                {
+                    <tr>
+                        <td>@article.ID</td>
+                        <td>@article.Title</td>
+                        <td>
+                            <a class="btn btn-primary" href='/editArticle/@article.ID'>Edit</a>  |
+                            <a class="btn btn-danger" @onclick="() => DeleteArticle(article.ID)">Delete</a>
+                        </td>
+                    </tr>
+                }
+            }
+
         </tbody>
     </table>
     <div class="pagination">
@@ -83,8 +98,14 @@ else
 
 
 @code {
-    List<Article>
-    articleModel;
+    private string searchTerm;
+    private string SearchTerm
+    {
+        get { return searchTerm; }
+        set { searchTerm = value; FilterRecords(); }
+    }
+
+    List<Article> articleModel;
     Article articleEntity = new Article();
 
 
@@ -108,8 +129,8 @@ else
         pagerSize = 3;
         pageSize = 2;
         curPage = 1;
-        articleModel = await articleManager.ListAll((curPage - 1) * pageSize, pageSize, sortColumnName, sortDir);
-        totalRecords = await articleManager.Count();
+        articleModel = await articleManager.ListAll((curPage - 1) * pageSize, pageSize, sortColumnName, sortDir, searchTerm);
+        totalRecords = await articleManager.Count(searchTerm);
         totalPages = (int)Math.Ceiling(totalRecords / (decimal)pageSize);
         SetPagerSize("forward");
     }
@@ -118,7 +139,7 @@ else
     protected async Task DeleteArticle(int id)
     {
         await articleManager.Delete(id);
-        articleModel = await articleManager.ListAll((curPage - 1) * pageSize, pageSize, sortColumnName, sortDir);
+        articleModel = await articleManager.ListAll((curPage - 1) * pageSize, pageSize, sortColumnName, sortDir, searchTerm);
     }
 
     private bool isSortedAscending;
@@ -126,7 +147,7 @@ else
 
     private async Task<List<Article>> SortRecords(string columnName, string dir)
     {
-        return await articleManager.ListAll((curPage - 1) * pageSize, pageSize, columnName, dir);
+        return await articleManager.ListAll((curPage - 1) * pageSize, pageSize, columnName, dir, searchTerm);
     }
 
     private async Task SortTable(string columnName)
@@ -172,7 +193,7 @@ else
 
     public async Task refreshRecords(int currentPage)
     {
-        articleModel = await articleManager.ListAll((currentPage - 1) * pageSize, pageSize, sortColumnName, sortDir);
+        articleModel = await articleManager.ListAll((currentPage - 1) * pageSize, pageSize, sortColumnName, sortDir, searchTerm);
         curPage = currentPage;
         this.StateHasChanged();
     }
@@ -196,6 +217,11 @@ else
         {
             endPage = startPage - 1;
             startPage = startPage - pagerSize;
+        }
+        else
+        {
+            startPage = 1;
+            endPage = totalPages;
         }
     }
 
@@ -224,6 +250,12 @@ else
             }
         }
         await refreshRecords(curPage);
+    }
+
+    public void FilterRecords()
+    {
+        endPage = 0;
+        this.OnInitializedAsync().Wait();
     }
 
 }

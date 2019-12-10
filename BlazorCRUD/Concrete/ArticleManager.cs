@@ -39,20 +39,19 @@ namespace BlazorCRUD.Concrete
                     commandType: CommandType.Text));
             return deleteArticle;
         }
-        
-        public Task<int> Count()
+
+        public Task<int> Count(string search)
         {
-            var totArticle = Task.FromResult(_dapperManager.Get<int>("select COUNT(*) from [Article]", null,
+            var totArticle = Task.FromResult(_dapperManager.Get<int>($"select COUNT(*) from [Article] WHERE Title like '%{search}%'", null,
                     commandType: CommandType.Text));
             return totArticle;
         }
 
-        public Task<List<Article>> ListAll(int skip, int take, string orderBy, string direction = "DESC")
+        public Task<List<Article>> ListAll(int skip, int take, string orderBy, string direction = "DESC", string search = "")
         {
             var articles = Task.FromResult(_dapperManager.GetAll<Article>
-                ($"select * from [Article] ORDER BY {orderBy} {direction} OFFSET {skip} ROWS FETCH NEXT {take} ROWS ONLY; ", null, commandType: CommandType.Text));
+                ($"SELECT * FROM [Article] WHERE Title like '%{search}%' ORDER BY {orderBy} {direction} OFFSET {skip} ROWS FETCH NEXT {take} ROWS ONLY; ", null, commandType: CommandType.Text));
             return articles;
-
         }
 
         public Task<int> Update(Article article)
