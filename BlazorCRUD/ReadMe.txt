@@ -1,5 +1,5 @@
 ====================================================================================
-EXECUTE BELOW SCRIPT AND CHANGE CONNECTION-STRING INSIDE "appsettings.json" FILE.
+EXECUTE BELOW SCRIPT IN	SQL SERVER AND CHANGE CONNECTION-STRING INSIDE "appsettings.json" FILE.
 ====================================================================================
 
 CREATE DATABASE [BlazorCRUD]
